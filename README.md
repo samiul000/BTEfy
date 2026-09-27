@@ -94,14 +94,14 @@ npm run build
 
 <table>
     <tr>
-        <td><img src="assets/ss1.png" width="50%"></td>
-        <td><img src="assets/ss2.png" width="50%"></td>
-        <td><img src="assets/ss3.png" width="50%"></td>
+        <td><img src="assets/ss1.png" width="100%" height="100%"></td>
+        <td><img src="assets/ss2.png" width="100%" height="100%"></td>
+        <td><img src="assets/ss3.png" width="100%" height="100%"></td>
     </tr>
     <tr>
-        <td><img src="assets/ss4.png" width="50%"></td>
-        <td><img src="assets/ss5.png" width="50%"></td>
-        <td><img src="assets/ss6.png" width="50%"></td>
+        <td><img src="assets/ss4.png" width="100%" height="100%"></td>
+        <td><img src="assets/ss5.png" width="100%" height="100%"></td>
+        <td><img src="assets/ss6.png" width="100%" height="100%"></td>
     </tr>
 </table>
 
