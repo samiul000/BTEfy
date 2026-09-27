@@ -1,26 +1,296 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ── Liquid Glass — tuned for dark space bg ── */
+  --glass-blur: 24px;
+  --glass-saturate: 160%;
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+
+  /* ── Text ── */
+  --foreground: #ffffff;
+  --foreground-muted: rgba(255, 255, 255, 0.9);
+  --foreground-dim: rgba(255, 255, 255, 0.6);
+
+  /* ── Accent — cool blue to match space bg ── */
+  --primary: #38bdf8;
+  --primary-foreground: #ffffff;
+  --accent: rgba(255, 255, 255, 0.08);
+  --accent-foreground: #ffffff;
+  --destructive: #f87171;
+  --destructive-foreground: #ffffff;
+  --ring: #38bdf8;
+
+  /* ── Status ── */
+  --status-connected: #34d399;
+  --status-disconnected: #6b7280;
+  --status-error: #f87171;
+  --status-reconnecting: #fbbf24;
+
+  /* ── Terminal ── */
+  --terminal-bg: rgba(0, 0, 0, 0.6);
+  --terminal-fg: #e2e8f0;
+
+  /* ── Charts ── */
+  --chart-1: #38bdf8;
+  --chart-2: #34d399;
+  --chart-3: #a78bfa;
+  --chart-4: #f87171;
+  --chart-5: #fbbf24;
+  --chart-6: #f472b6;
 }
 
 @theme inline {
-  --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-dim: var(--foreground-dim);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-ring: var(--ring);
+  --color-terminal-bg: var(--terminal-bg);
+  --color-terminal-fg: var(--terminal-fg);
+  --color-status-connected: var(--status-connected);
+  --color-status-disconnected: var(--status-disconnected);
+  --color-status-error: var(--status-error);
+  --color-status-reconnecting: var(--status-reconnecting);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-jetbrains);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Reset ─── */
+*,
+*::before,
+*::after {
+  border-color: var(--glass-border);
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  background: #000;
+  overflow-x: hidden;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* ─── Background ─── */
+.bg-app {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url("/bg.jpg") center/cover no-repeat fixed;
+  filter: blur(5px);
+  transform: scale(1.05);
+}
+
+.bg-app::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LIQUID GLASS
+   ═══════════════════════════════════════════════════════ */
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur))
+    saturate(var(--glass-saturate));
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.glass-subtle {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   GLASS INPUTS
+   ═══════════════════════════════════════════════════════ */
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: var(--foreground);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.glass-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 0 0 3px rgba(56, 189, 248, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.glass-input::placeholder {
+  color: var(--foreground-dim);
+}
+
+/* ═══════════════════════════════════════════════════════
+   GLASS BUTTONS
+   ═══════════════════════════════════════════════════════ */
+
+.glass-btn {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: var(--foreground);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.glass-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.glass-btn:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.glass-btn-primary {
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 0.85),
+    rgba(14, 165, 233, 0.85)
+  );
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  color: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(56, 189, 248, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.glass-btn-primary:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 1),
+    rgba(14, 165, 233, 1)
+  );
+  box-shadow: 0 6px 28px rgba(56, 189, 248, 0.45);
+  transform: translateY(-1px);
+}
+
+.glass-btn-primary:active {
+  transform: translateY(0);
+}
+
+.glass-btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.glass-btn-destructive {
+  background: linear-gradient(
+    135deg,
+    rgba(248, 113, 113, 0.85),
+    rgba(239, 68, 68, 0.85)
+  );
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(248, 113, 113, 0.3);
+}
+
+.glass-btn-destructive:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(248, 113, 113, 1),
+    rgba(239, 68, 68, 1)
+  );
+  box-shadow: 0 6px 28px rgba(248, 113, 113, 0.45);
+  transform: translateY(-1px);
+}
+
+.glass-btn-destructive:active {
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════════ */
+
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(56, 189, 248, 0.35);
+  color: white;
+}
+
+option {
+  background: #0f172a;
+  color: white;
 }

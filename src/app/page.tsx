@@ -1,69 +1,227 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { AppShell } from "@/components/layout/AppShell";
+import { useConnectionStore } from "@/lib/state/connection-store";
+import { useTelemetryStore } from "@/lib/state/telemetry-store";
+import { formatBytes, formatDuration, formatRate } from "@/lib/utils/bytes";
+import { useState, useEffect } from "react";
+import {
+  Bluetooth,
+  Usb,
+  Wifi,
+  Activity,
+  ArrowDown,
+  ArrowUp,
+  Zap,
+} from "lucide-react";
+
+export default function DashboardPage() {
+  const connection = useConnectionStore();
+  const telemetry = useTelemetryStore();
+  const channels = telemetry.getChannelArray();
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!connection.sessionStart) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [connection.sessionStart]);
+
+  const sessionDuration = connection.sessionStart
+    ? now - connection.sessionStart
+    : 0;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+    <AppShell>
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-white">
+              Dashboard
+            </h1>
+            <p className="text-sm text-white/90">
+              MCU Bridge : Bluetooth &amp; Serial Debug Console
+            </p>
+          </div>
+          <div className="glass rounded-full px-4 py-2 flex items-center gap-2">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                connection.isConnected
+                  ? "bg-status-connected shadow-lg shadow-green-500/40"
+                  : connection.state === "error"
+                    ? "bg-status-error"
+                    : connection.state === "reconnecting"
+                      ? "bg-status-reconnecting animate-pulse"
+                      : "bg-status-disconnected"
+              }`}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <span className="text-sm font-medium capitalize text-white">
+              {connection.state}
+            </span>
+          </div>
         </div>
-      </main>
+
+        {/* Connection Card */}
+        <div className="glass rounded-2xl p-5">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-white/90 mb-4">
+            Connection
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/5 border border-white/10">
+                {connection.transportType === "ble" ? (
+                  <Bluetooth size={20} className="text-sky-400" />
+                ) : connection.transportType === "serial" ? (
+                  <Usb size={20} className="text-sky-400" />
+                ) : (
+                  <Wifi size={20} className="text-white" />
+                )}
+              </div>
+              <div>
+                <p className="text-[11px] text-white/90">Transport</p>
+                <p className="text-sm font-semibold uppercase text-white">
+                  {connection.transportType ?? "None"}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[11px] text-white/90">Device</p>
+              <p className="text-sm font-medium text-white">
+                {connection.deviceName ?? "Not connected"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-[11px] text-white/90">Session</p>
+              <p className="text-sm font-medium font-mono text-white">
+                {connection.sessionStart
+                  ? formatDuration(sessionDuration)
+                  : "—"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-[11px] text-white/90">Reconnects</p>
+              <p className="text-sm font-medium text-white">
+                {connection.reconnectCount}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Traffic Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard
+            label="RX"
+            value={formatBytes(connection.rxBytes)}
+            icon={<ArrowDown size={16} className="text-green-400" />}
+          />
+          <StatCard
+            label="TX"
+            value={formatBytes(connection.txBytes)}
+            icon={<ArrowUp size={16} className="text-blue-400" />}
+          />
+          <StatCard
+            label="RX Rate"
+            value={
+              connection.sessionStart
+                ? formatRate(
+                    connection.rxBytes /
+                      ((now - connection.sessionStart) / 1000),
+                  )
+                : "0 B/s"
+            }
+            icon={<Activity size={16} className="text-sky-400" />}
+          />
+          <StatCard
+            label="Messages"
+            value={`${connection.rxMessages + connection.txMessages}`}
+            icon={<Zap size={16} className="text-purple-400" />}
+          />
+        </div>
+
+        {/* Telemetry Preview */}
+        <div className="glass rounded-2xl p-5">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-white/90 mb-4">
+            Telemetry Channels
+          </h2>
+          {channels.length === 0 ? (
+            <p className="text-sm text-white">
+              No telemetry channels active. Connect a device to start receiving
+              data.
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {channels.map((ch) => (
+                <div key={ch.id} className="glass-subtle rounded-xl p-3">
+                  <p className="text-[11px] text-white/90">{ch.name}</p>
+                  <p className="text-lg font-mono font-bold text-white">
+                    {ch.latest.toFixed(1)}
+                    {ch.unit && (
+                      <span className="text-xs font-normal ml-1 text-white/90">
+                        {ch.unit}
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-[11px] text-white">
+                    {ch.sampleCount} samples
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Quick Actions */}
+        <div className="glass rounded-2xl p-5">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-white/90 mb-4">
+            Quick Actions
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            <a
+              href="/terminal"
+              className="glass-btn-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all"
+            >
+              Open Terminal
+            </a>
+            <a
+              href="/devices"
+              className="glass-btn inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all"
+            >
+              <Bluetooth size={16} />
+              Scan Devices
+            </a>
+            <a
+              href="/settings"
+              className="glass-btn inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all"
+            >
+              Settings
+            </a>
+          </div>
+        </div>
+      </div>
+    </AppShell>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="glass rounded-2xl p-4 transition-all hover:bg-white/[0.08]">
+      <div className="flex items-center gap-2 mb-2">
+        {icon}
+        <p className="text-[11px] text-white/90">{label}</p>
+      </div>
+      <p className="text-lg font-mono font-bold text-white">{value}</p>
     </div>
   );
 }
