@@ -45,7 +45,9 @@ HTTPS. `localhost` is exempt and works during development.
 (6E400001-B5A3-F393-E0A9-E50E24DCCA9E). BTEfy ships this driver as
 `driver/BTEfyDebug.zip`. In Arduino IDE, install it through
 Sketch -> Include Library -> Add .ZIP Library, then include it with
-`#include <BTEfyDebug.h>`.
+`#include <BTEfyDebug.h>`. PlatformIO builds the same library, see
+[PlatformIO](#platformio); MicroPython uses a separate port, see
+[MicroPython](#micropython).
 
 **NimBLEDevice library.** The driver is built on NimBLE-Arduino, which
 provides the `NimBLEDevice` API. Version 2.0.0 or newer is required.
@@ -79,6 +81,63 @@ USB serial; HM-10 modules over BLE; HC-05 through its OS virtual COM port.
 
 Reference firmware without the driver: `examples/ble-demo/`,
 `examples/generic-uart/`.
+
+### PlatformIO
+
+PlatformIO builds the driver as-is; it is a standard Arduino library.
+Unzip `driver/BTEfyDebug.zip` into your project's `lib/` folder:
+
+```
+project/
+|-- platformio.ini
+|-- src/main.cpp
+`-- lib/BTEfyDebug/
+```
+
+`src/main.cpp` holds the sketch from [Getting started](#getting-started)
+with `#include <Arduino.h>` added at the top.
+
+PlatformIO does not apply `depends=` from `library.properties` to a
+library that already sits in `lib/`, so NimBLE-Arduino has to be listed
+explicitly in `platformio.ini`:
+
+```ini
+[env:esp32dev]
+platform = espressif32
+board = esp32dev
+framework = arduino
+
+lib_deps =
+    NimBLE-Arduino@^2.0.0
+```
+
+Build with `pio run` and flash with `pio run -t upload`.
+
+### MicroPython
+
+`examples/micropython/` carries the driver ported to MicroPython's
+`bluetooth` module, so nothing has to be compiled. It needs MicroPython
+1.20.0 or newer on an ESP32. Flash the firmware, then copy the driver and
+one of the two examples across:
+
+```bash
+mpremote cp examples/micropython/btefy.py :btefy.py
+mpremote cp examples/micropython/basic.py :main.py
+```
+
+`main.py` runs at boot, and the API matches the Arduino driver:
+
+```python
+from btefy import BTEfy
+
+BTEfy.begin("MyRobot", "1.0.0")
+BTEfy.log("WIFI", "connected")      # [WIFI] connected
+BTEfy.metric("TEMP", 25.4)          # TEMP=25.40, plotted
+```
+
+The other example emits JSON Lines telemetry, and the API table, the
+notes on single-client advertising and a board-free self-check live in
+`examples/micropython/README.md`.
 
 ## Development
 
@@ -126,6 +185,7 @@ stream. Details in `docs/telemetry.md`.
 - `docs/telemetry.md`: parsing rules and chart behaviour
 - `docs/troubleshooting.md`: connection and capability problems
 - `docs/architecture.md`: module layout and data flow
+- `examples/micropython/README.md`: MicroPython driver and examples
 
 ## Privacy
 

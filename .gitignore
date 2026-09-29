@@ -47,3 +47,5 @@ examples/BTEfyDebug
 # Extras
 
 INSTRUCTION.md
+/brag-output
+examples/micropython/__pycache__
